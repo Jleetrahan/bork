@@ -1,5 +1,3 @@
-import java.util.Scanner;
-import java.util.ArrayList;
 
 /**
  * 
@@ -12,7 +10,6 @@ import java.util.ArrayList;
  *
  */
 class NPC {
-	static class NoNPCException extends Exception {}
 	
 	private String name;
 	private Room currentRoom;
@@ -20,7 +17,7 @@ class NPC {
 	private int health;
 	private boolean isAlive;
 	private int maxLightLevelToSpawn;
-	private ArrayList<Item> inventory;
+	private Item inventory;
 	
 	/** Creates a new NPC from a given Scanner connected to a .bork file
 	 * 
@@ -29,9 +26,13 @@ class NPC {
 	 * @param initState Whether or not the NPC should be set to its initial state, or set to a saved state from a .sav file
 	 * @throws NoNPCException Thrown when a parsing line marking the end of the NPC section in the file is reached
 	 */
-	public NPC(Scanner scan, Dungeon d, boolean initState) throws NoNPCException
+	public NPC(Breed breed)
 	{
-		
+            this.name = breed.getName();
+            this.isHostile = true;
+            this.health = breed.getMaxHp();
+            this.isAlive = true;
+            this.maxLightLevelToSpawn = breed.getMaxLightLevelToSpawn();
 	}
 	
 	/** Determines if the NPC goes by the paramater name
@@ -41,7 +42,7 @@ class NPC {
 	 */
 	public boolean goesBy(String name)
 	{
-		
+	    return name.equals(this.name);
 	}
 	
 	/** Returns the NPC's name
@@ -50,7 +51,7 @@ class NPC {
 	 */
 	public String getName()
 	{
-		return name;
+            return name;
 	}
 	
 	/** Returns whether or not the NPC is currently alive
@@ -59,7 +60,7 @@ class NPC {
 	 */
 	public boolean getIsAlive()
 	{
-		return isAlive;
+            return isAlive;
 	}
 	
 	/** Returns whether or not the NPC is hostile to the player
@@ -68,7 +69,7 @@ class NPC {
 	 */
 	public boolean getIsHostile()
 	{
-		return isHostile;
+            return isHostile;
 	}
 	
 	/** Returns the Room the NPC is currently in, null if it has not spawned yet
@@ -77,55 +78,16 @@ class NPC {
 	 */
 	public Room getCurrentRoom()
 	{
-		return currentRoom;
+            return currentRoom;
 	}
 	
 	/** A list of the names of the Item's in the NPC's inventory
 	 * 
 	 * @return An ArrayList<String> of all the names of the Items in inventory
 	 */
-	public ArrayList<String> getInventoryNames()
+	public String getInventoryName()
 	{
-		
-	}
-	
-	/** Trades the parameter Item with the first Item in the NPC's inventory, will not be enacted if the NPC's inventory is empty
-	 * 
-	 * @param itemToTrade Item that the NPC will receive
-	 * @return Item that the NPC will give in return
-	 */
-	public Item trade(Item itemToTrade)
-	{
-		
-	}
-	
-	/** Adds an Item to the NPC's inventory
-	 * 
-	 * @param item Item to add to inventory
-	 */
-	public void addToInventory(Item item)
-	{
-		inventory.add(item);
-	}
-	
-	/** Removes an Item from the NPC's inventory
-	 * 
-	 * @param item Item remove from inventory
-	 */
-	private void removeFromInventory(Item item)
-	{
-		inventory.remove(item);
-	}
-	
-	/** Returns an Item from the NPC's inventory going by the parameter name
-	 * 
-	 * @param name Name of the Item to search for in inventory
-	 * @return The Item going by the parameter name if it is in inventory
-	 * @throws NoItemException If there is no Item in inventory that goes by the parameter name
-	 */
-	public Item getItemFromInventoryNamed(String name) throws NoItemException
-	{
-		
+	    return inventory.getPrimaryName();
 	}
 	
 	/** Adjusts this NPC's health by the parameter amount
@@ -134,15 +96,6 @@ class NPC {
      */
 	public void changeHealth(int wound)
 	{
-		health -= wound;
-	}
-	
-	/** Moves the NPC to a new Room
-	 * 
-	 * @return The Room the NPC moved to
-	 */
-	public Room move()
-	{
-		
+            health -= wound;
 	}
 }

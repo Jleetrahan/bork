@@ -145,4 +145,233 @@ class NPC {
 	{
 		
 	}
+	
+	public int getHp() {return hp;}
+    
+    public int getMaxHp() {return breed.getMaxHp();}
+    
+    public int getAttack() {return attack;}
+    
+    public int getBaseAttack() {return breed.getBaseAttack();}
+    
+    public void setHp(int newHp) {hp = newHp;}
+    
+    public void setAttack(int newAttack) {attack = newAttack;}
+    
+    public void attack(Monster target) {
+        System.out.println(attack + " damage!");
+        target.setHp(target.getHp()-attack);
+    }
+    
+    public void speak(int i) {System.out.println(breed.getMessages()[i]);}
+    
+    
+    //Stack variables/meathods
+    final int MAX_STACK = 128;
+    int stackSize = 0;
+    int[] stack = new int[MAX_STACK];
+
+    void push(int value) {
+        assert(stackSize < MAX_STACK);
+        stack[stackSize++] = value;
+    }
+
+    int pop() {
+        assert(stackSize > 0);
+        return stack[--stackSize];
+    }
+    
+    public void Interpret(Monster target, boolean elite) {
+        for (int i = 0; i < breed.getAi().length; i++) {
+            String instruction = breed.getAi()[i];
+            //System.out.println(instruction);
+            switch (instruction) {
+                //Next string will be a number
+                case "LITERAL": {
+                    int val = Integer.parseInt(breed.getAi()[++i]);
+                    push(val);
+                    break;
+                }
+                
+                //Add the last two numbers on the stack, push the result
+                case "ADD": {
+                    int b = pop();
+                    int a = pop();
+                    push(a+b);
+                    break;
+                }
+                
+                //Subtract the last two numbers on the stack, push the result
+                case "SUBTRACT": {
+                    int b = pop();
+                    int a = pop();
+                    push(a-b);
+                    break;
+                }
+                
+                //Multiply the last two numbers on the stack, push the result
+                case "MULTIPLY": {
+                    int b = pop();
+                    int a = pop();
+                    push(a*b);
+                    break;
+                }
+                
+                //Divide the last two numbers on the stack, push the result
+                case "DIVIDE": {
+                    int b = pop();
+                    int a = pop();
+                    push(a/b);
+                    break;
+                }
+                
+                //Push the monsters current health
+                case "GET_HP": {
+                    push(getHp());
+                    break;
+                }
+                
+                //Push the monsters maximum health
+                case "GET_MAX_HP": {
+                    push(breed.getMaxHp());
+                    break;
+                }
+                
+                //Push the monsters current attack
+                case "GET_ATTACK": {
+                    push(getAttack());
+                    break;
+                }
+                
+                //Push the monsters base attack
+                case "GET_BASE_ATTACK": {
+                    push(breed.getBaseAttack());
+                    break;
+                }
+                
+                //Set monsters curent health
+                case "SET_HP": {
+                    setHp(pop());
+                    break;
+                }
+                
+                //Set monsters curent attack
+                case "SET_ATTACK": {
+                    setAttack(pop());
+                    break;
+                }
+                
+                //Attack opponent
+                case "ATTACK": {
+                    attack(target);
+                    break;
+                }
+                
+                //Print one of the messages, based off the next literal
+                case "SPEAK": {
+                    speak(Integer.parseInt(breed.getAi()[++i]));
+                    break;
+                }
+                
+                //Jump to the next JUMP_TO in the command stream
+                //but only if the last value in the stack != 0
+                case "JUMP": {
+                    int val = pop();
+                    if (0 != val) {
+                        while (!breed.getAi()[i].equals("JUMP_TO")) {
+                            i++;
+                        }
+                    }
+                    break;
+                }
+                
+                //Pushes 1 if the number two positions back in the stack
+                //is less than the number one position back, and 0 otherwise
+                case "LESS_THAN": {
+                    int b = pop();
+                    int a = pop();
+                    if (a < b) {
+                        push(1);
+                    } else {
+                        push(0);
+                    }
+                    break;
+                }
+                
+                //Pushes 1 if the number two positions back in the stack
+                //is equal to the number one position back, and 0 otherwise
+                case "EQUAL_TO": {
+                    int b = pop();
+                    int a = pop();
+                    if (a == b) {
+                        push(1);
+                    } else {
+                        push(0);
+                    }
+                    break;
+                }
+                
+                //Pushes 1 if the number two positions back in the stack
+                //is greater than the number one position back, and 0 otherwise
+                case "GREATER_THAN": {
+                    int b = pop();
+                    int a = pop();
+                    if (a > b) {
+                        push(1);
+                    } else {
+                        push(0);
+                    }
+                    break;
+                }
+                
+                //If the last value in the stack is not a zero, changes to zero
+                //if it is a zero, changes to 1
+                case "NOT": {
+                    int val = pop();
+                    if (val == 0) {
+                        push(1);
+                    } else {
+                        push(0);
+                    }
+                    break;
+                }
+                
+                //Pushes either 0 or 1 to the stack, psudorandomly
+                case "RANDOM": {
+                    int val = new Random().nextInt(2);
+                    push(val);
+                    break;
+                }
+                
+                //And gate
+                case "AND": {
+                    int b = pop();
+                    int a = pop();
+                    if (a == 1 && b == 1) {
+                        push(1);
+                    } else {
+                        push(0);
+                    }
+                    break;
+                }
+                
+                //Or gate
+                case "OR": {
+                    int b = pop();
+                    int a = pop();
+                    if (a == 1 || b == 1) {
+                        push(1);
+                    } else {
+                        push(0);
+                    }
+                    break;
+                }
+                
+                //Ends the curent run
+                case "END": {
+                    i = breed.getAi().length;
+                    break;
+                }
+            }
+        }
 }
